@@ -2,7 +2,6 @@ import datetime
 
 from django.db import models
 from django.shortcuts import get_object_or_404
-from django.template.defaultfilters import slugify
 
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
@@ -27,8 +26,8 @@ class BlogIndexPage(Page):
         "intro",
     ]
 
-    def get_context(self, request):
-        context = super().get_context(request)
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
 
         tag = request.GET.get("tag")
         posts = BlogPage.objects.live().public().order_by("-first_published_at")
@@ -105,8 +104,8 @@ class BlogPage(Page):
     def tag_list(self):
         return self.tags.all()
 
-    def get_context(self, request):
-        context = super().get_context(request)
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
         siblings = (
             BlogPage.objects.live()
             .public()

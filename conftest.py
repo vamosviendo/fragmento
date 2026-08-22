@@ -6,7 +6,6 @@ depend on Wagtail's page hierarchy. Runs without DB migrations (pytest-django
 """
 import pytest
 
-from wagtail.coreutils import get_supported_content_language_variant
 from wagtail.models import Page, Site
 
 from blog.models import BlogIndexPage
@@ -30,7 +29,6 @@ def site_tree(db):
             numchild=0,
         )
         root.save()
-        from wagtail.models import i18n as wagtail_i18n
         try:
             root.save_revision().publish()
         except Exception:

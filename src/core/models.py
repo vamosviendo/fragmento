@@ -14,8 +14,8 @@ class HomePage(Page):
 
     max_count = 1
 
-    def get_context(self, request):
-        context = super().get_context(request)
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
         from blog.models import BlogPage
 
         context["latest_posts"] = (
