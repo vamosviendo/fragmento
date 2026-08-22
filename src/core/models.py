@@ -1,26 +1,6 @@
-from django.db import models
-
-from wagtail.models import Page
+from django.apps import AppConfig
 
 
-class HomePage(Page):
-    intro = models.TextField(blank=True)
-
-    template = "core/home_page.html"
-
-    content_panels = Page.content_panels + [
-        "intro",
-    ]
-
-    max_count = 1
-
-    def get_context(self, request, *args, **kwargs):
-        context = super().get_context(request, *args, **kwargs)
-        from blog.models import BlogPage
-
-        context["latest_posts"] = (
-            BlogPage.objects.live()
-            .public()
-            .order_by("-first_published_at")[:5]
-        )
-        return context
+class CoreConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "core"

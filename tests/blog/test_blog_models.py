@@ -10,7 +10,7 @@ from blog.models import BlogIndexPage, BlogPage
 
 @pytest.fixture
 def blog_index(site_tree):
-    return BlogIndexPage.objects.child_of(site_tree["home"]).first()
+    return site_tree["blog"]
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def make_posts(blog_index):
             if tags:
                 tag_list = [tags] if isinstance(tags, str) else tags
                 post.tags.add(*tag_list)
-                post.save_revision().publish()
+            post.save_revision().publish()
             posts.append(post)
         return posts
 
@@ -47,6 +47,7 @@ class TestBlogIndexPageContext:
         assert "page_obj" in context
         assert "paginator" in context
         assert "all_tags" in context
+        assert "archive" in context
 
     def test_pagination_defaults_to_first_page(self, blog_index, make_posts):
         make_posts(15)
@@ -96,6 +97,32 @@ class TestBlogIndexPageContext:
         tag_names = sorted(t.name for t in context["all_tags"])
         assert tag_names == ["django", "python"]
 
+    def test_filters_by_month(self, blog_index, make_posts):
+        make_posts(2, base_date=datetime.date(2026, 1, 15))
+        make_posts(3, base_date=datetime.date(2026, 6, 15))
+        request = RequestFactory().get("/blog/?month=2026-06")
+        context = blog_index.get_context(request)
+
+        assert len(context["posts"]) == 3
+        assert context["current_month"] == {"year": 2026, "month": 6}
+
+    def test_invalid_month_falls_back_to_all(self, blog_index, make_posts):
+        make_posts(3)
+        request = RequestFactory().get("/blog/?month=not-a-date")
+        context = blog_index.get_context(request)
+
+        assert len(context["posts"]) == 3
+        assert "current_month" not in context
+
+    def test_archive_lists_months(self, blog_index, make_posts):
+        make_posts(2, base_date=datetime.date(2026, 1, 1))
+        make_posts(1, base_date=datetime.date(2026, 6, 1))
+        request = RequestFactory().get("/blog/")
+        context = blog_index.get_context(request)
+
+        months = [d.strftime("%Y-%m") for d in context["archive"]]
+        assert months == ["2026-06", "2026-01"]
+
 
 @pytest.mark.django_db
 class TestBlogPageContext:
@@ -112,7 +139,6 @@ class TestBlogPageContext:
         assert context["prev_post"].id != context["next_post"].id
 
     def test_newest_post_has_no_prev(self, blog_index, make_posts):
-        """El post más reciente no tiene un post anterior (más nuevo) en el blog."""
         posts = make_posts(2)
         newest = max(posts, key=lambda p: p.date)
         request = RequestFactory().get("/")
@@ -122,7 +148,6 @@ class TestBlogPageContext:
         assert context["next_post"] is not None
 
     def test_oldest_post_has_no_next(self, blog_index, make_posts):
-        """El post más antiguo no tiene un post siguiente (más antiguo) en el blog."""
         posts = make_posts(2)
         oldest = min(posts, key=lambda p: p.date)
         request = RequestFactory().get("/")
@@ -139,3 +164,27 @@ class TestBlogPageContext:
 
         names = sorted(t.name for t in post.tag_list)
         assert names == ["alpha", "beta"]
+
+
+@pytest.mark.django_db
+class TestBlogPageExcerpt:
+    def test_excerpt_uses_intro_when_present(self, blog_index):
+        unique = uuid.uuid4().hex[:8]
+        post = BlogPage(
+            title=f"Excerpt {unique}",
+            slug=f"excerpt-{unique}",
+            intro="Resumen corto",
+            body="<p>Cuerpo</p>",
+        )
+        assert post.excerpt == "Resumen corto"
+
+    def test_excerpt_falls_back_to_stripped_body(self, blog_index):
+        unique = uuid.uuid4().hex[:8]
+        post = BlogPage(
+            title=f"Excerpt {unique}",
+            slug=f"excerpt-{unique}",
+            intro="",
+            body="<p>Texto del cuerpo con <strong>html</strong></p>",
+        )
+        assert post.excerpt.startswith("Texto del cuerpo")
+        assert "<" not in post.excerpt

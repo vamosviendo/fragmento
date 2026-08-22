@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+
+{% block title %}Borrar post · escritor{% endblock %}
+
+{% block content %}
+<section class="max-w-xl mx-auto">
+    <h1 class="text-3xl font-serif font-semibold mb-4">Borrar post</h1>
+    <p class="mb-6 text-stone-700">
+        ¿Seguro que querés borrar el post <strong>{{ post.title }}</strong>?
+        El post dejará de estar visible pero se conserva en la base de datos.
+    </p>
+
+    <form method="post" class="flex items-center gap-3">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800">
+            Confirmar borrado
+        </button>
+        <a href="{% url 'wagtail_serve' '' %}" class="text-stone-600 hover:underline">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

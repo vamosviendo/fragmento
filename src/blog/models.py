@@ -2,6 +2,8 @@ import datetime
 
 from django.db import models
 from django.shortcuts import get_object_or_404
+from django.template.defaultfilters import truncatechars
+from django.utils.html import strip_tags
 
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
@@ -20,6 +22,7 @@ class BlogIndexPage(Page):
 
     template = "blog/blog_index_page.html"
 
+    parent_page_types = ["wagtailcore.Page"]
     subpage_types = ["blog.BlogPage"]
 
     content_panels = Page.content_panels + [
@@ -30,12 +33,24 @@ class BlogIndexPage(Page):
         context = super().get_context(request, *args, **kwargs)
 
         tag = request.GET.get("tag")
+        month = request.GET.get("month")
+
         posts = BlogPage.objects.live().public().order_by("-first_published_at")
 
         if tag:
             tag_obj = get_object_or_404(Tag, slug=tag)
             posts = posts.filter(tags__slug=tag)
             context["current_tag"] = tag_obj
+
+        if month:
+            try:
+                year_str, month_str = month.split("-")
+                year, month_num = int(year_str), int(month_str)
+            except (TypeError, ValueError):
+                year, month_num = None, None
+            if year and month_num:
+                posts = posts.filter(date__year=year, date__month=month_num)
+                context["current_month"] = {"year": year, "month": month_num}
 
         page = request.GET.get("page", 1)
         try:
@@ -50,6 +65,10 @@ class BlogIndexPage(Page):
             Tag.objects.filter(blog_blogpagetag_items__isnull=False)
             .distinct()
             .order_by("name")
+        )
+        context["archive"] = (
+            BlogPage.objects.live().public()
+            .dates("date", "month", order="DESC")
         )
         return context
 
@@ -103,6 +122,13 @@ class BlogPage(Page):
     @property
     def tag_list(self):
         return self.tags.all()
+
+    @property
+    def excerpt(self):
+        if self.intro:
+            return self.intro
+        plain = strip_tags(self.body)
+        return truncatechars(plain, 240)
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)

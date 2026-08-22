@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if form_mode == 'edit' %}Editar{% else %}Nuevo{% endif %} post · escritor{% endblock %}
+
+{% block content %}
+<section class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-serif font-semibold mb-6">
+        {% if form_mode == 'edit' %}Editar post{% else %}Nuevo post{% endif %}
+    </h1>
+
+    <form method="post" novalidate class="space-y-4">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="border border-red-300 bg-red-50 text-red-800 p-3 rounded">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.title.id_for_label }}">Título</label>
+            {{ form.title }}
+            {% if form.title.errors %}<p class="text-sm text-red-700 mt-1">{{ form.title.errors }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.date.id_for_label }}">Fecha</label>
+            {{ form.date }}
+            {% if form.date.errors %}<p class="text-sm text-red-700 mt-1">{{ form.date.errors }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.intro.id_for_label }}">Resumen</label>
+            {{ form.intro }}
+            {% if form.intro.errors %}<p class="text-sm text-red-700 mt-1">{{ form.intro.errors }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.body.id_for_label }}">Texto</label>
+            {{ form.body }}
+            {% if form.body.errors %}<p class="text-sm text-red-700 mt-1">{{ form.body.errors }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.tags.id_for_label }}">Tags (separados por coma)</label>
+            {{ form.tags }}
+            {% if form.tags.errors %}<p class="text-sm text-red-700 mt-1">{{ form.tags.errors }}</p>{% endif %}
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+            <button type="submit" class="px-4 py-2 bg-amber-700 text-white rounded hover:bg-amber-800">
+                Guardar
+            </button>
+            <a href="{% url 'wagtail_serve' '' %}" class="text-stone-600 hover:underline">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
