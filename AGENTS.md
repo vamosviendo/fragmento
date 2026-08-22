@@ -14,50 +14,53 @@ This file provides guidance for AI agents working on this codebase.
 ## Project Layout
 
 ```
-escritor/                  # Django project package
-  settings/
-    base.py                # Shared settings
-    dev.py                 # Development overrides (DEBUG=True)
-    production.py          # PostgreSQL + env-driven settings
-    local.py               # Local-only overrides (not in git)
-  urls.py
-  wsgi.py / asgi.py
-core/                      # Site-level app (HomePage + base template)
-  models.py                # HomePage (max_count=1)
-  templates/core/base.html # Layout principal (header, footer)
-  templates/core/home_page.html
-  management/commands/init_site.py  # Crea HomePage, BlogIndexPage y Site por defecto
-blog/                      # Blog app
-  models.py                # BlogIndexPage, BlogPage, BlogPageTag
-  migrations/
-  templates/blog/
-    blog_index_page.html
-    blog_page.html
-    includes/blog_card.html
-    includes/pagination.html
-tests/                     # Tests pytest (ubicación canónica)
-  core/test_home_page.py
-  blog/test_blog_models.py
-static/css/site.css        # Estilos globales (complemento a clases Tailwind)
-src/                       # Datos generados (sqlite, media, static)
-  db.sqlite3
-  media/
-  static/
-manage.py
-pytest.ini
-conftest.py                # Fixture `site_tree`
-requirements.txt
+./
+  AGENTS.md
+  conftest.py
+  pytest.ini
+  requirements.txt
+  tests/                     # Tests pytest (ubicación canónica)
+    core/test_home_page.py
+    blog/test_blog_models.py
+  src/                       # Código + datos generados
+    manage.py
+    db.sqlite3
+    static/css/site.css
+    media/
+    blog/                    # Blog app
+      models.py              # BlogIndexPage, BlogPage, BlogPageTag
+      migrations/
+      templates/blog/
+        blog_index_page.html
+        blog_page.html
+        includes/blog_card.html
+        includes/pagination.html
+    core/                    # Site-level app (HomePage + base template)
+      models.py              # HomePage (max_count=1)
+      templates/core/base.html
+      templates/core/home_page.html
+      management/commands/init_site.py  # Crea HomePage, BlogIndexPage y Site por defecto
+    escritor/                # Django project package
+      settings/
+        base.py              # Shared settings
+        dev.py               # Development overrides (DEBUG=True)
+        production.py        # PostgreSQL + env-driven settings
+        local.py             # Local-only overrides (not in git)
+      urls.py
+      wsgi.py / asgi.py
 ```
 
 ---
 
 ## Build / Lint / Test Commands
 
-### Django Management
+Todos los comandos Django se ejecutan desde `src/`:
 
 ```bash
-# Run development server
-python manage.py runserver
+cd src
+
+# Run development server (cualquier puerto)
+python manage.py runserver 8014
 
 # Initialise site tree (idempotent: HomePage + BlogIndexPage + default Site)
 python manage.py init_site
@@ -72,7 +75,7 @@ python manage.py makemigrations
 python manage.py collectstatic --noinput
 ```
 
-### Running Tests
+Los tests se ejecutan desde la raíz del repo (no requieren `cd`):
 
 ```bash
 # Run all tests
@@ -142,9 +145,9 @@ from core.models import HomePage
 
 - **Models**: Define in `models.py` per app, inheriting from `wagtail.models.Page`.
 - **Templates**: Store in `<app>/templates/<app>/`.
-- **Static files**: Store in `static/<app>/`.
-- **Settings**: Modular (`settings/base.py`, `settings/dev.py`, `settings/production.py`).
-- **Test files**: `test_*.py` inside `tests/<app>/`.
+- **Static files**: Store in `src/static/`.
+- **Settings**: Modular (`escritor/settings/base.py`, `dev.py`, `production.py`).
+- **Test files**: `test_*.py` inside `tests/<app>/` (sibling to `src/`).
 
 ### Test Organization
 
@@ -153,7 +156,7 @@ Follow this structure in tests:
 1. **Functional tests**: Test from user perspective using templates (Selenium). *Not yet implemented.*
 2. **Unit tests**: Test models, template tags, views.
 3. Tests must be based on pytest.
-4. Canonical location for tests is `tests/`.
+4. Canonical location for tests is `tests/` (not inside each app).
 
 ### Unit tests
 
@@ -171,10 +174,10 @@ Follow this structure in tests:
 After running `migrate`, the Wagtail tree only contains the root page. To get a working site (HomePage + BlogIndexPage + default Site pointing at HomePage) run:
 
 ```bash
-python manage.py init_site
+cd src && python manage.py init_site
 ```
 
-This is idempotent and safe to re-run.
+This is idempotent and safe to re-run. The default site listens on `hostname=localhost, port=80`, but Wagtail resolves by hostname first, so any port (e.g. `runserver 8014`) is served at `http://localhost:8014/`.
 
 ---
 
@@ -182,13 +185,14 @@ This is idempotent and safe to re-run.
 
 | Path                                              | Description                                |
 |---------------------------------------------------|--------------------------------------------|
-| `escritor/settings/base.py`                       | Main Django settings                       |
-| `escritor/settings/dev.py`                        | Development settings                       |
-| `core/models.py`                                  | HomePage model                             |
-| `blog/models.py`                                  | BlogIndexPage and BlogPage models          |
-| `core/management/commands/init_site.py`           | Bootstrap default site tree                |
+| `src/escritor/settings/base.py`                   | Main Django settings                       |
+| `src/escritor/settings/dev.py`                    | Development settings                       |
+| `src/escritor/urls.py`                            | Root URLconf (no i18n prefix)              |
+| `src/core/models.py`                              | HomePage model                             |
+| `src/blog/models.py`                              | BlogIndexPage and BlogPage models          |
+| `src/core/management/commands/init_site.py`       | Bootstrap default site tree                |
 | `pytest.ini`                                      | pytest configuration                       |
 | `conftest.py`                                     | Project-wide pytest fixtures               |
 | `src/db.sqlite3`                                  | SQLite database file                       |
 | `src/media`                                       | Uploaded media                             |
-| `src/static`                                      | Collected static files                     |
+| `src/static`                                      | Static source files                        |
