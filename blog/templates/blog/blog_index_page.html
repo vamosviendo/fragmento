@@ -1,0 +1,46 @@
+{% extends "core/base.html" %}
+
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block content %}
+    <header class="mb-10 text-center">
+        <h1 class="text-4xl font-serif font-semibold mb-3">{{ page.title }}</h1>
+        {% if page.intro %}
+            <p class="text-lg text-stone-600 max-w-2xl mx-auto">{{ page.intro }}</p>
+        {% endif %}
+    </header>
+
+    {% if all_tags %}
+        <nav class="mb-10 flex flex-wrap gap-2 justify-center text-sm">
+            <a href="{% pageurl page %}" class="px-3 py-1 rounded-full border border-stone-300 hover:border-amber-700">Todos</a>
+            {% for tag in all_tags %}
+                <a href="?tag={{ tag.slug }}"
+                   class="px-3 py-1 rounded-full border border-stone-300 hover:border-amber-700
+                          {% if current_tag.slug == tag.slug %}bg-amber-700 text-white border-amber-700{% endif %}">
+                    {{ tag.name }}
+                </a>
+            {% endfor %}
+        </nav>
+    {% endif %}
+
+    {% if current_tag %}
+        <p class="mb-6 text-sm text-stone-500">
+            Filtrando por etiqueta: <strong>{{ current_tag.name }}</strong>
+            &middot; <a href="{% pageurl page %}" class="underline">quitar filtro</a>
+        </p>
+    {% endif %}
+
+    {% if posts %}
+        <ul class="space-y-8">
+            {% for post in posts %}
+                <li class="border-b border-stone-200 pb-8">
+                    {% include "blog/includes/blog_card.html" with post=post %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% include "blog/includes/pagination.html" with page_obj=page_obj paginator=paginator %}
+    {% else %}
+        <p class="text-stone-500">Aún no hay entradas.</p>
+    {% endif %}
+{% endblock %}

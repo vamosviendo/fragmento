@@ -1,0 +1,15 @@
+/* Pequeño ajuste para que las clases Tailwind sin compilar tengan un mínimo de tipografía decente. */
+body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+h1, h2, h3, .font-serif {
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+.prose p { margin-bottom: 1em; line-height: 1.7; }
+.prose h2 { font-size: 1.5rem; font-weight: 600; margin: 1.5em 0 0.5em; }
+.prose h3 { font-size: 1.25rem; font-weight: 600; margin: 1.25em 0 0.5em; }
+.prose a { color: #b45309; text-decoration: underline; }
+.prose blockquote { border-left: 4px solid #d6d3d1; padding-left: 1em; color: #57534e; font-style: italic; }
+.prose img { border-radius: 0.5rem; margin: 1.5em 0; }

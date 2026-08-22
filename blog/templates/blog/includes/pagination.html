@@ -1,0 +1,19 @@
+{% if page_obj.has_other_pages %}
+    <nav class="mt-10 flex justify-between items-center text-sm">
+        <div>
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_tag %}&tag={{ current_tag.slug }}{% endif %}"
+                   class="text-amber-700 hover:underline">&larr; Anteriores</a>
+            {% endif %}
+        </div>
+        <p class="text-stone-500">
+            Página {{ page_obj.number }} de {{ paginator.num_pages }}
+        </p>
+        <div>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if current_tag %}&tag={{ current_tag.slug }}{% endif %}"
+                   class="text-amber-700 hover:underline">Siguientes &rarr;</a>
+            {% endif %}
+        </div>
+    </nav>
+{% endif %}
