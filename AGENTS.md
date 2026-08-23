@@ -94,16 +94,6 @@ pytest tests/blog/test_blog_models.py::TestBlogIndexPageContext::test_filters_by
 pytest -v
 ```
 
----
-
-## General behavior
-
-- Atenerse al modo Plan a menos que esté seleccionado explícitamente el modo build.
-- No aplicar directamente cambios al código, sino presentarlos en pantalla para su revisión. Indicar con un comentario los lugares específicos del código en los que se han hecho cambios.
-- Cuando falte información, solicitarla. Comprobar en vez de inferir o suponer. Empiria.
-
----
-
 ## Code Style Guidelines
 
 ### General Principles
@@ -129,9 +119,10 @@ from core.models import HomePage
 ### Formatting
 
 - **Line length**: Max 120 characters.
-- **Indentation**: 4 spaces.
+- **Indentation**: 4 spaces, except in HTML: 2 spaces.
 - **Blank lines**: Two between top-level definitions, one between methods.
 - **No trailing whitespace**.
+
 
 ### Naming Conventions
 
