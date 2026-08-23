@@ -30,6 +30,8 @@ class BlogIndexPage(Page):
     ]
 
     def get_context(self, request, *args, **kwargs):
+        from blog.forms import BlogPostForm
+
         context = super().get_context(request, *args, **kwargs)
 
         tag = request.GET.get("tag")
@@ -70,6 +72,8 @@ class BlogIndexPage(Page):
             BlogPage.objects.live().public()
             .dates("date", "month", order="DESC")
         )
+        context["form"] = BlogPostForm()
+
         return context
 
 
