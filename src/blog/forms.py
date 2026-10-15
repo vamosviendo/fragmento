@@ -10,7 +10,8 @@ class BlogPostForm(forms.ModelForm):
         widgets = {
             "date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "intro": forms.TextInput(),
-            "body": forms.Textarea(attrs={"rows": 8}),
+            "body": forms.Textarea(attrs={"rows": 12, "class": "w-full"}),
+            "tags": forms.TextInput(attrs={"class": "w-full"}),
         }
         labels = {
             "intro": "Resumen",

@@ -120,3 +120,21 @@
   </section>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+  tinymce.init({
+    selector: "textarea[name='body']",
+    menubar: false,
+    width: "100%",
+    height: 400,
+    plugins: "lists link autolink",
+    toolbar: "undo redo | blocks | bold italic | bullist numlist blockquote | link | removeformat",
+    block_formats: "Párrafo=p; Encabezado 2=h2; Encabezado 3=h3",
+    setup: function (editor) {
+        editor.on("change", function () { editor.save(); });
+    },
+  });
+</script>
+{% endblock %}

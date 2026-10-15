@@ -44,11 +44,18 @@ def test_user_can_create_post(selenium_driver, live_url, superuser):
 
     _login(driver, live_url, superuser["username"], superuser["password"])
     driver.get(live_url("/posts/new/"))
+    has_tinymce = driver.execute_script("return typeof window.tinymce != 'undefined';")
 
     driver.find_element("name", "title").send_keys("Post desde Selenium")
     driver.find_element("name", "date").send_keys("2026-08-22")
     driver.find_element("name", "intro").send_keys("Resumen desde UI")
-    driver.find_element("name", "body").send_keys("Cuerpo del post")
+    if has_tinymce:
+        driver.execute_script(
+            "tinymce.get(tinymce.activeEditor.id).setContent('<p>Cuerpo del post</p>');"
+            "tinymce.triggerSave();"
+        )
+    else:
+        driver.find_element("name", "body").send_keys("Cuerpo del post")
     driver.find_element("name", "tags").send_keys("alpha, beta")
     driver.find_element("css selector", "button[type=submit]").click()
 
